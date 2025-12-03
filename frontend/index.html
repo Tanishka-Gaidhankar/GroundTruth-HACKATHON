@@ -1,0 +1,676 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>InsightGen - Automated Report Generator</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .container {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            max-width: 700px;
+            width: 100%;
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #1B3A47 0%, #2D7A8F 100%);
+            color: white;
+            padding: 40px 20px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 32px;
+            margin-bottom: 8px;
+            font-weight: 700;
+        }
+
+        .header p {
+            font-size: 14px;
+            opacity: 0.9;
+            font-weight: 300;
+        }
+
+        .content {
+            padding: 40px;
+        }
+
+        .form-group {
+            margin-bottom: 24px;
+        }
+
+        .form-group label {
+            display: block;
+            font-size: 14px;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 8px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .form-group input[type="text"] {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            font-size: 14px;
+            transition: border-color 0.3s;
+        }
+
+        .form-group input[type="text"]:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        .file-upload-wrapper {
+            position: relative;
+            border: 2px dashed #667eea;
+            border-radius: 8px;
+            padding: 30px 20px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s;
+            background: #f8f9ff;
+        }
+
+        .file-upload-wrapper:hover {
+            border-color: #764ba2;
+            background: #f0f2ff;
+        }
+
+        .file-upload-wrapper.dragover {
+            border-color: #764ba2;
+            background: #f0f2ff;
+            transform: scale(1.02);
+        }
+
+        .file-upload-wrapper input[type="file"] {
+            display: none;
+        }
+
+        .upload-icon {
+            font-size: 40px;
+            margin-bottom: 12px;
+        }
+
+        .upload-text {
+            font-size: 14px;
+            color: #666;
+            margin-bottom: 4px;
+        }
+
+        .upload-text strong {
+            color: #667eea;
+        }
+
+        .upload-hint {
+            font-size: 12px;
+            color: #999;
+            margin-top: 8px;
+        }
+
+        .file-list {
+            margin-top: 16px;
+            padding: 12px;
+            background: white;
+            border-radius: 6px;
+            border: 1px solid #eee;
+            max-height: 150px;
+            overflow-y: auto;
+        }
+
+        .file-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 8px 0;
+            font-size: 13px;
+            color: #333;
+            border-bottom: 1px solid #f0f0f0;
+        }
+
+        .file-item:last-child {
+            border-bottom: none;
+        }
+
+        .file-item-name {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .file-item-size {
+            font-size: 12px;
+            color: #999;
+        }
+
+        .remove-file {
+            background: none;
+            border: none;
+            color: #e74c3c;
+            cursor: pointer;
+            font-size: 18px;
+            padding: 0;
+        }
+
+        .button-group {
+            display: flex;
+            gap: 12px;
+            margin-top: 30px;
+        }
+
+        .btn {
+            flex: 1;
+            padding: 14px 24px;
+            border: none;
+            border-radius: 6px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .btn-primary:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(102, 126, 234, 0.3);
+        }
+
+        .btn-primary:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .btn-secondary {
+            background: #f0f0f0;
+            color: #333;
+        }
+
+        .btn-secondary:hover:not(:disabled) {
+            background: #e0e0e0;
+        }
+
+        .progress-section {
+            display: none;
+            margin-top: 30px;
+            padding-top: 30px;
+            border-top: 1px solid #eee;
+        }
+
+        .progress-section.active {
+            display: block;
+        }
+
+        .progress-item {
+            display: flex;
+            align-items: center;
+            margin-bottom: 16px;
+            gap: 12px;
+        }
+
+        .progress-icon {
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+            font-weight: bold;
+        }
+
+        .progress-icon.pending {
+            background: #f0f0f0;
+            color: #999;
+        }
+
+        .progress-icon.active {
+            background: #667eea;
+            color: white;
+            animation: pulse 1s infinite;
+        }
+
+        .progress-icon.done {
+            background: #27ae60;
+            color: white;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.6; }
+        }
+
+        .progress-text {
+            font-size: 13px;
+            color: #666;
+        }
+
+        .result-section {
+            display: none;
+            margin-top: 30px;
+            padding-top: 30px;
+            border-top: 1px solid #eee;
+            text-align: center;
+        }
+
+        .result-section.active {
+            display: block;
+        }
+
+        .result-success {
+            background: #d4edda;
+            border: 1px solid #c3e6cb;
+            border-radius: 6px;
+            padding: 16px;
+            margin-bottom: 20px;
+            color: #155724;
+            font-size: 14px;
+        }
+
+        .result-error {
+            background: #f8d7da;
+            border: 1px solid #f5c6cb;
+            border-radius: 6px;
+            padding: 16px;
+            margin-bottom: 20px;
+            color: #721c24;
+            font-size: 14px;
+        }
+
+        .download-btn {
+            background: linear-gradient(135deg, #27ae60 0%, #229954 100%);
+            color: white;
+            padding: 14px 32px;
+            border: none;
+            border-radius: 6px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: inline-block;
+            text-decoration: none;
+        }
+
+        .download-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(39, 174, 96, 0.3);
+        }
+
+        .summary-box {
+            background: #f8f9fa;
+            border-radius: 6px;
+            padding: 16px;
+            margin: 16px 0;
+            text-align: left;
+            font-size: 13px;
+        }
+
+        .summary-item {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 8px;
+            color: #666;
+        }
+
+        .summary-item:last-child {
+            margin-bottom: 0;
+        }
+
+        .summary-value {
+            font-weight: 600;
+            color: #667eea;
+        }
+
+        @media (max-width: 600px) {
+            .header h1 {
+                font-size: 24px;
+            }
+
+            .content {
+                padding: 24px;
+            }
+
+            .button-group {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>📊 InsightGen</h1>
+            <p>Automated Performance Report Generator with AI-Powered Insights</p>
+        </div>
+
+        <div class="content">
+            <form id="reportForm">
+                <!-- Client Name -->
+                <div class="form-group">
+                    <label for="clientName">Client Name</label>
+                    <input type="text" id="clientName" name="clientName" placeholder="e.g., GroundTruth" value="GroundTruth" required>
+                </div>
+
+                <!-- File Upload -->
+                <div class="form-group">
+                    <label>Upload CSV Files</label>
+                    <div class="file-upload-wrapper" id="fileUploadWrapper">
+                        <div class="upload-icon">📁</div>
+                        <div class="upload-text">
+                            Drag & drop CSV files or <strong>click to browse</strong>
+                        </div>
+                        <div class="upload-hint">
+                            Expected: campaigns.csv, traffic.csv, weather.csv (optional), etc.
+                        </div>
+                        <input type="file" id="fileInput" name="files" multiple accept=".csv" required>
+                    </div>
+                    <div class="file-list" id="fileList" style="display: none;"></div>
+                </div>
+
+                <!-- Buttons -->
+                <div class="button-group">
+                    <button type="submit" class="btn btn-primary" id="submitBtn">
+                        ✨ Generate Report
+                    </button>
+                    <button type="reset" class="btn btn-secondary" id="resetBtn">
+                        Clear
+                    </button>
+                </div>
+            </form>
+
+            <!-- Progress Section -->
+            <div class="progress-section" id="progressSection">
+                <h3 style="margin-bottom: 16px; color: #333;">Generating Report...</h3>
+                
+                <div class="progress-item">
+                    <div class="progress-icon pending" id="step1Icon">1</div>
+                    <div class="progress-text">Loading and parsing CSV files</div>
+                </div>
+
+                <div class="progress-item">
+                    <div class="progress-icon pending" id="step2Icon">2</div>
+                    <div class="progress-text">Calculating KPIs and metrics</div>
+                </div>
+
+                <div class="progress-item">
+                    <div class="progress-icon pending" id="step3Icon">3</div>
+                    <div class="progress-text">Analyzing weather correlations</div>
+                </div>
+
+                <div class="progress-item">
+                    <div class="progress-icon pending" id="step4Icon">4</div>
+                    <div class="progress-text">Detecting anomalies</div>
+                </div>
+
+                <div class="progress-item">
+                    <div class="progress-icon pending" id="step5Icon">5</div>
+                    <div class="progress-text">Benchmarking against industry standards</div>
+                </div>
+
+                <div class="progress-item">
+                    <div class="progress-icon pending" id="step6Icon">6</div>
+                    <div class="progress-text">Generating PDF report</div>
+                </div>
+            </div>
+
+            <!-- Result Section -->
+            <div class="result-section" id="resultSection">
+                <div id="resultContent"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const form = document.getElementById('reportForm');
+        const fileInput = document.getElementById('fileInput');
+        const fileUploadWrapper = document.getElementById('fileUploadWrapper');
+        const fileList = document.getElementById('fileList');
+        const submitBtn = document.getElementById('submitBtn');
+        const progressSection = document.getElementById('progressSection');
+        const resultSection = document.getElementById('resultSection');
+        const clientNameInput = document.getElementById('clientName');
+
+        let selectedFiles = [];
+
+        // File upload handlers
+        fileUploadWrapper.addEventListener('click', () => fileInput.click());
+
+        fileUploadWrapper.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            fileUploadWrapper.classList.add('dragover');
+        });
+
+        fileUploadWrapper.addEventListener('dragleave', () => {
+            fileUploadWrapper.classList.remove('dragover');
+        });
+
+        fileUploadWrapper.addEventListener('drop', (e) => {
+            e.preventDefault();
+            fileUploadWrapper.classList.remove('dragover');
+            handleFiles(e.dataTransfer.files);
+        });
+
+        fileInput.addEventListener('change', (e) => {
+            handleFiles(e.target.files);
+        });
+
+        function handleFiles(files) {
+            selectedFiles = Array.from(files).filter(f => f.name.endsWith('.csv'));
+            
+            if (selectedFiles.length === 0) {
+                alert('Please select CSV files');
+                return;
+            }
+
+            displayFileList();
+        }
+
+        function displayFileList() {
+            fileList.innerHTML = '';
+            
+            selectedFiles.forEach((file, index) => {
+                const item = document.createElement('div');
+                item.className = 'file-item';
+                item.innerHTML = `
+                    <div class="file-item-name">
+                        <span>📄</span>
+                        <span>${file.name}</span>
+                    </div>
+                    <div style="display: flex; align-items: center; gap: 8px;">
+                        <span class="file-item-size">${(file.size / 1024).toFixed(1)} KB</span>
+                        <button type="button" class="remove-file" onclick="removeFile(${index})">×</button>
+                    </div>
+                `;
+                fileList.appendChild(item);
+            });
+
+            fileList.style.display = selectedFiles.length > 0 ? 'block' : 'none';
+        }
+
+        function removeFile(index) {
+            selectedFiles.splice(index, 1);
+            displayFileList();
+        }
+
+        // Form submission
+        form.addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            if (selectedFiles.length === 0) {
+                alert('Please select at least one CSV file');
+                return;
+            }
+
+            await generateReport();
+        });
+
+        async function generateReport() {
+            const formData = new FormData();
+            
+            selectedFiles.forEach(file => {
+                formData.append('files', file);
+            });
+            
+            formData.append('client_name', clientNameInput.value);
+
+            // Show progress
+            form.style.display = 'none';
+            progressSection.classList.add('active');
+            resultSection.classList.remove('active');
+
+            try {
+                // Simulate progress updates
+                updateProgress(1, 'active');
+                await sleep(800);
+
+                updateProgress(2, 'active');
+                updateProgress(1, 'done');
+                await sleep(800);
+
+                updateProgress(3, 'active');
+                updateProgress(2, 'done');
+                await sleep(800);
+
+                updateProgress(4, 'active');
+                updateProgress(3, 'done');
+                await sleep(800);
+
+                updateProgress(5, 'active');
+                updateProgress(4, 'done');
+                await sleep(800);
+
+                updateProgress(6, 'active');
+                updateProgress(5, 'done');
+                await sleep(500);
+
+                // Send to backend
+                const response = await fetch('http://localhost:5000/upload', {
+                    method: 'POST',
+                    body: formData
+                });
+
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+
+                const data = await response.json();
+
+                updateProgress(6, 'done');
+                await sleep(500);
+
+                // Show result
+                showSuccess(data);
+
+            } catch (error) {
+                console.error('Error:', error);
+                updateProgress(6, 'pending');
+                showError(error.message);
+            }
+        }
+
+        function updateProgress(step, status) {
+            const icon = document.getElementById(`step${step}Icon`);
+            icon.className = `progress-icon ${status}`;
+            
+            if (status === 'done') {
+                icon.textContent = '✓';
+            } else if (status === 'active') {
+                icon.textContent = step;
+            }
+        }
+
+        function showSuccess(data) {
+            progressSection.classList.remove('active');
+            resultSection.classList.add('active');
+
+            const summary = data.summary || {};
+            const kpis = summary.kpis || {};
+
+            let summaryHTML = `
+                <div class="result-success">
+                    ✅ Report generated successfully for <strong>${data.client_name}</strong>!
+                </div>
+
+                <div class="summary-box">
+                    <div class="summary-item">
+                        <span>Total Conversions:</span>
+                        <span class="summary-value">${kpis.total_conversions?.toLocaleString() || 'N/A'}</span>
+                    </div>
+                    <div class="summary-item">
+                        <span>Total Revenue:</span>
+                        <span class="summary-value">$${kpis.total_revenue?.toLocaleString() || '0.00'}</span>
+                    </div>
+                    <div class="summary-item">
+                        <span>Average CTR:</span>
+                        <span class="summary-value">${kpis.avg_ctr?.toFixed(2) || 'N/A'}%</span>
+                    </div>
+                    <div class="summary-item">
+                        <span>Average ROAS:</span>
+                        <span class="summary-value">${kpis.avg_roas?.toFixed(2) || 'N/A'}x</span>
+                    </div>
+                </div>
+
+                <a href="http://localhost:5000/reports/${data.report_file}" 
+                   class="download-btn" download>
+                    📥 Download PDF Report
+                </a>
+            `;
+
+            document.getElementById('resultContent').innerHTML = summaryHTML;
+
+            // Show reset button
+            setTimeout(() => {
+                form.style.display = 'block';
+                document.getElementById('resetBtn').style.display = 'inline-block';
+            }, 1000);
+        }
+
+        function showError(error) {
+            progressSection.classList.remove('active');
+            resultSection.classList.add('active');
+
+            document.getElementById('resultContent').innerHTML = `
+                <div class="result-error">
+                    ❌ Error generating report: ${error}
+                </div>
+                <button class="btn btn-primary" onclick="location.reload()" style="margin-top: 16px;">
+                    Try Again
+                </button>
+            `;
+        }
+
+        function sleep(ms) {
+            return new Promise(resolve => setTimeout(resolve, ms));
+        }
+
+        // Initialize
+        displayFileList();
+    </script>
+</body>
+</html>
