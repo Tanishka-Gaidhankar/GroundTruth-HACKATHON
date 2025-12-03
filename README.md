@@ -79,6 +79,83 @@ Backend (Python/Flask)
     ↓
 Client (Beautiful, Actionable Report)
 ```
+## 🎓 How It Works (Step-by-Step)
+
+### Step 1: Data Ingestion
+- User uploads 4-5 CSV files via web interface
+- Backend reads and validates each file
+- Checks for common keys (date, campaign_id, location)
+
+### Step 2: Data Standardization & Merging
+- Renames columns to standard schema
+- Converts data types (dates, numeric fields)
+- Merges all files on common key (LEFT JOIN on date)
+
+### Step 3: KPI Calculation
+- CTR = Clicks / Impressions
+- CPC = Spend / Clicks
+- CVR = Conversions / Clicks
+- CPA = Spend / Conversions
+- ROAS = Revenue / Spend
+- Grouping by campaign, channel, location, day-of-week
+
+### Step 4: Weather Correlation Analysis 
+```python
+correlation = campaigns_df['conversions'].corr(weather_df['rainfall'])
+# If |correlation| > 0.6: strong signal
+# Generate insight: "Rainy days drive X% more/less conversions"
+```
+
+### Step 5: Anomaly Detection 
+```python
+# Use Z-Score: |value - mean| / std_dev
+# Flag if Z > 2 (95% confidence it's anomalous)
+anomalies = data[np.abs(stats.zscore(data['ctr'])) > 2]
+```
+
+### Step 6: Competitive Benchmarking 
+```python
+# Load industry_benchmarks.json
+client_ctr = 5.0
+industry_ctr = 3.2
+percentile = (client_ctr - industry_ctr) / industry_ctr * 100
+# Result: "You're in top 15%"
+```
+
+### Step 7: Predictive Forecasting 
+```python
+# Simple: Use trend from last 7 days + confidence interval
+# Advanced: ARIMA, Linear Regression
+forecast = data['conversions'].tail(7).mean() * trend_factor
+```
+
+### Step 8: LLM-Powered Insights
+Prompt to Gemini/Groq:
+```
+You are a marketing analyst. Analyze this performance data:
+[KPI Summary + Anomalies + Weather Insights + Benchmarks + Forecast in JSON]
+
+Provide:
+1. DESCRIPTIVE: What happened? (facts, trends, outliers)
+2. PRESCRIPTIVE: What should we do? (5+ actionable recommendations)
+```
+
+### Step 9: Chart Generation
+- Line chart: Impressions, clicks, conversions over time (highlight anomalies)
+- Bar chart: ROAS by campaign/channel (vs. benchmark)
+- Scatter: Weather vs. Conversions (show correlation)
+- Forecast: Next 7 days with confidence interval
+
+### Step 10: Report Generation
+- **PDF/PowerPoint** with:
+  - Executive summary (LLM-generated)
+  - Key metrics table (vs. benchmark)
+  - Weather insights section
+  - Anomalies flagged with severity
+  - Forecast section with confidence
+  - Charts and visualizations
+  - Detailed prescriptive recommendations
+  - Ready to send to clients
 
 ---
 
@@ -141,57 +218,6 @@ export GEMINI_API_KEY="your_api_key_here"
 export GROQ_API_KEY="your_api_key_here"
 ```
 
-### Run Locally
-
-#### Option 1: CLI (Fastest for Hackathon)
-```bash
-python generate_report.py --csvs campaigns.csv traffic.csv weather.csv --week "2025-01-01" --format pdf --client "Acme Corp" --include-anomalies --include-benchmarks --include-forecast
-```
-
-#### Option 2: Web Interface
-```bash
-flask run
-# Open http://localhost:5000
-```
-
----
-
-## 📁 Project Structure
-
-```
-InsightGen/
-├── frontend/
-│   ├── index.html              # Main web interface
-│   ├── css/
-│   │   └── styles.css
-│   └── js/
-│       └── app.js
-├── backend/
-│   ├── pipeline.py             # Step 1: Data ingestion & merging
-│   ├── kpi_calculator.py       # Step 2: Compute metrics
-│   ├── weather_analyzer.py     # Step 3: Weather correlation analysis (NEW)
-│   ├── anomaly_detector.py     # Step 4: Anomaly detection (NEW)
-│   ├── benchmarking.py         # Step 5: Competitive benchmarking (NEW)
-│   ├── forecaster.py           # Step 6: Predictive forecasting (NEW)
-│   ├── insights_generator.py   # Step 7: LLM integration
-│   ├── chart_generator.py      # Step 8: Create visualizations
-│   ├── report_builder.py       # Step 9: PDF/PPT generation
-│   ├── app.py                  # Flask/FastAPI server
-│   └── config.py               # Configuration & API keys
-├── sample_data/
-│   ├── campaigns.csv
-│   ├── traffic.csv
-│   ├── weather.csv
-│   ├── customers.csv
-│   └── budget.csv
-├── benchmarks/
-│   └── industry_benchmarks.json # Industry average KPIs (NEW)
-├── requirements.txt
-├── README.md
-└── .env                        # API keys (do NOT commit)
-```
-
----
 
 ## 🔧 Technical Stack
 
@@ -248,116 +274,7 @@ InsightGen/
 
 ---
 
-## 🎓 How It Works (Step-by-Step)
 
-### Step 1: Data Ingestion
-- User uploads 4-5 CSV files via web interface
-- Backend reads and validates each file
-- Checks for common keys (date, campaign_id, location)
-
-### Step 2: Data Standardization & Merging
-- Renames columns to standard schema
-- Converts data types (dates, numeric fields)
-- Merges all files on common key (LEFT JOIN on date)
-
-### Step 3: KPI Calculation
-- CTR = Clicks / Impressions
-- CPC = Spend / Clicks
-- CVR = Conversions / Clicks
-- CPA = Spend / Conversions
-- ROAS = Revenue / Spend
-- Grouping by campaign, channel, location, day-of-week
-
-### Step 4: Weather Correlation Analysis (NEW)
-```python
-correlation = campaigns_df['conversions'].corr(weather_df['rainfall'])
-# If |correlation| > 0.6: strong signal
-# Generate insight: "Rainy days drive X% more/less conversions"
-```
-
-### Step 5: Anomaly Detection (NEW)
-```python
-# Use Z-Score: |value - mean| / std_dev
-# Flag if Z > 2 (95% confidence it's anomalous)
-anomalies = data[np.abs(stats.zscore(data['ctr'])) > 2]
-```
-
-### Step 6: Competitive Benchmarking (NEW)
-```python
-# Load industry_benchmarks.json
-client_ctr = 5.0
-industry_ctr = 3.2
-percentile = (client_ctr - industry_ctr) / industry_ctr * 100
-# Result: "You're in top 15%"
-```
-
-### Step 7: Predictive Forecasting (NEW)
-```python
-# Simple: Use trend from last 7 days + confidence interval
-# Advanced: ARIMA, Linear Regression
-forecast = data['conversions'].tail(7).mean() * trend_factor
-```
-
-### Step 8: LLM-Powered Insights
-Prompt to Gemini/Groq:
-```
-You are a marketing analyst. Analyze this performance data:
-[KPI Summary + Anomalies + Weather Insights + Benchmarks + Forecast in JSON]
-
-Provide:
-1. DESCRIPTIVE: What happened? (facts, trends, outliers)
-2. PRESCRIPTIVE: What should we do? (5+ actionable recommendations)
-```
-
-### Step 9: Chart Generation
-- Line chart: Impressions, clicks, conversions over time (highlight anomalies)
-- Bar chart: ROAS by campaign/channel (vs. benchmark)
-- Scatter: Weather vs. Conversions (show correlation)
-- Forecast: Next 7 days with confidence interval
-
-### Step 10: Report Generation
-- **PDF/PowerPoint** with:
-  - Executive summary (LLM-generated)
-  - Key metrics table (vs. benchmark)
-  - Weather insights section
-  - Anomalies flagged with severity
-  - Forecast section with confidence
-  - Charts and visualizations
-  - Detailed prescriptive recommendations
-  - Ready to send to clients
-
----
-
-## 🔐 Environment Variables
-
-Create a `.env` file in the root directory:
-
-```env
-# API Keys
-GEMINI_API_KEY=your_gemini_key_here
-GROQ_API_KEY=your_groq_key_here
-
-# Report Settings
-REPORT_FORMAT=pdf  # or ppt
-INCLUDE_RECOMMENDATIONS=true
-INCLUDE_ANOMALIES=true
-INCLUDE_BENCHMARKS=true
-INCLUDE_FORECAST=true
-INCLUDE_WEATHER_INSIGHTS=true
-CLIENT_NAME="Your Client Name"
-
-# Feature Flags
-ENABLE_LLM=true
-ENABLE_WEATHER_ANALYSIS=true
-ENABLE_ANOMALY_DETECTION=true
-ANOMALY_THRESHOLD=2.0  # Z-Score threshold
-
-# Flask
-FLASK_ENV=development
-FLASK_DEBUG=true
-```
-
----
 
 ## 📦 Requirements
 
@@ -377,115 +294,4 @@ reportlab==4.0.0
 python-pptx==0.6.21
 python-dotenv==1.0.0
 requests==2.31.0
-```
 
----
-
-## 🏆 Hackathon Scope (4 Hours)
-
-For a 4-hour hackathon, focus on this priority order:
-
-✅ **Hour 1** (0-60 min):
-- Data ingestion (pipeline.py)
-- Basic KPI calculation
-- Frontend file upload
-
-✅ **Hour 2** (60-120 min):
-- Weather correlation analysis
-- Anomaly detection (Z-Score)
-- PDF generation with tables
-
-✅ **Hour 3** (120-180 min):
-- Competitive benchmarking (use hard-coded benchmarks)
-- Predictive forecasting (simple trend)
-- Add charts (matplotlib)
-
-✅ **Hour 4** (180-240 min):
-- LLM integration for smart insights
-- Polish UI/UX
-- Testing
-
-📌 **Minimum Demo for Judges**:
-- Upload 3 CSVs → Click "Generate Report" → Download PDF showing:
-  - ✅ KPI Table
-  - ✅ Weather Correlation (if strong signal)
-  - ✅ 2-3 Anomalies Detected
-  - ✅ Benchmark Comparison
-  - ✅ Simple Forecast
-
----
-
-## 🚀 Features Implementation Checklist
-
-- [x] Multi-source CSV ingestion
-- [x] Data standardization & merging
-- [x] KPI calculation (CTR, CPC, CVR, CPA, ROAS)
-- [ ] Weather correlation analysis
-- [ ] Anomaly detection
-- [ ] Competitive benchmarking
-- [ ] Predictive forecasting
-- [ ] LLM integration
-- [ ] Chart generation
-- [ ] PDF/PPT export
-- [ ] Interactive frontend
-- [ ] CLI interface
-
----
-
-## 🤝 Contributing
-
-1. Fork the repository
-2. Create a feature branch (`git checkout -b feature/your-feature`)
-3. Commit changes (`git commit -m "Add feature"`)
-4. Push to branch (`git push origin feature/your-feature`)
-5. Open a Pull Request
-
----
-
-## 📝 License
-
-MIT License - see LICENSE file for details
-
----
-
-## 🙋 Support
-
-For issues, questions, or suggestions:
-- Open an [Issue](https://github.com/yourusername/InsightGen/issues)
-- Email: support@insightgen.dev
-
----
-
-## 🎉 Credits
-
-Built with ❤️ for the **4-Hour AI Hackathon**
-
-**Team**: [Your Team Name]  
-**Mentors**: [Mentor Names]  
-**Event**: [Hackathon Name]
-
----
-
-## 📌 Unique Value Proposition
-
-> **InsightGen** stands out because it doesn't just report what happened—it **correlates weather patterns, detects anomalies automatically, benchmarks against competitors, and forecasts trends** to explain *why* performance changed and *what to do about it*. All in one beautiful, AI-powered report.
-
----
-
-## 📌 Next Steps (Post-Hackathon)
-
-- [ ] Deploy on AWS/GCP
-- [ ] Add Docker support
-- [ ] Implement user authentication & multi-tenant
-- [ ] Add more LLM providers (Claude, OpenAI)
-- [ ] Support more data sources (SQL databases, APIs)
-- [ ] Interactive dashboard (Plotly/Dash)
-- [ ] Email scheduling for automated weekly reports
-- [ ] Mobile app for report viewing
-- [ ] Advanced ML models (Prophet, XGBoost)
-- [ ] Custom benchmarks per industry/segment
-
----
-
-**Last Updated**: December 3, 2025  
-**Version**: 1.0.0 (Hackathon Release with Unique Features)
