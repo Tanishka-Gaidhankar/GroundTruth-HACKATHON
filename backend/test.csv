@@ -1,0 +1,7 @@
+date,campaign,channel,impressions,clicks,conversions,spend,revenue,visits,temperature_c,rainfall_mm
+2025-01-01,C1,Search,1000,100,20,100,400,200,10,0
+2025-01-02,C1,Search,1200,120,25,110,450,210,12,0
+2025-01-03,C1,Search,900,90,15,90,350,180,15,0
+2025-01-04,C1,Search,800,80,10,80,300,150,18,5
+2025-01-05,C1,Search,750,70,8,75,260,140,16,8
+2025-01-06,C1,Search,700,60,6,70,230,130,14,10

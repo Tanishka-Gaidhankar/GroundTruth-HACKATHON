@@ -1,0 +1,9 @@
+date,campaign_id,campaign_name,channel,impressions,clicks,spend,conversions,revenue
+2025-01-01,C1,Brand Search,search,10000,500,250,50,1000
+2025-01-02,C1,Brand Search,search,10500,520,255,52,1040
+2025-01-03,C1,Brand Search,search,9800,480,240,48,960
+2025-01-04,C1,Brand Search,search,10200,510,252,51,1020
+2025-01-05,C1,Brand Search,search,9900,495,248,49,980
+2025-01-06,C1,Brand Search,search,10100,505,250,50,1000
+2025-01-07,C1,Brand Search,search,30000,200,800,5,200
+2025-01-08,C1,Brand Search,search,9500,100,230,3,120

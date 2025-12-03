@@ -1,0 +1,31 @@
+{
+  "overall": {
+    "avg_ctr": 3.5,
+    "avg_cpc": 1.25,
+    "avg_cpm": 8.50,
+    "avg_conversion_rate": 2.5,
+    "avg_roas": 2.0,
+    "avg_cpa": 50.00
+  },
+  "email": {
+    "avg_ctr": 5.0,
+    "avg_cpc": 0.50,
+    "avg_conversion_rate": 4.2,
+    "avg_roas": 4.5,
+    "avg_cpa": 25.00
+  },
+  "search": {
+    "avg_ctr": 4.2,
+    "avg_cpc": 1.50,
+    "avg_conversion_rate": 3.5,
+    "avg_roas": 3.0,
+    "avg_cpa": 40.00
+  },
+  "social": {
+    "avg_ctr": 2.0,
+    "avg_cpc": 2.00,
+    "avg_conversion_rate": 1.5,
+    "avg_roas": 1.5,
+    "avg_cpa": 60.00
+  }
+}
