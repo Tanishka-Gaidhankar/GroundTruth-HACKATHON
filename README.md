@@ -161,7 +161,7 @@ Provide:
 
 ## 📋 Data Requirements
 
-The system accepts multiple CSV files with the following structure:
+The system accepts multiple CSV files with the following structure (synthetic dataset for requirement) :
 
 ### 1. **campaigns.csv**
 ```
